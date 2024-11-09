@@ -1,8 +1,67 @@
-﻿@{
+﻿@model ToDoPageViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    @if (Model.Items.Count == 0)
+    {
+        <h1 class="display-4">Brak zadań</h1>
+        <p>Aby dodać pierwsze zadanie <a href="/Home/ToDoForm">kliknij tutaj</a>.</p>
+    }
+    else
+    {
+        <h1 class="display-4">Lista zadań</h1>
+        <p>Aby dodać zadanie <a href="/Home/ToDoForm">kliknij tutaj</a>.</p>
+
+        <table class="table table-striped">
+            <tr>
+                <th>Status</th>
+                <th>Zadanie</th>
+                <th>Data wykonania</th>
+            </tr>
+            @foreach (var item in Model.Items)
+            {
+                <tr data-todo-item-id="@item.Id" data-todo-is-done=@(item.IsDone ? "true" : "false")>
+                    <td><button class="btn btn-light" onclick="updateToDoItem(@item.Id);">@(item.IsDone ? "✅" : "❌")</button></td>
+                    <td>@item.Text</td>
+                    <td>@item.DueDate</td>
+                </tr>
+            }
+        </table>
+    }
 </div>
+
+<script>
+    async function updateToDoItem(id) {
+        try {
+            const tr = document.querySelector(`tr[data-todo-item-id="${id}"]`);
+            const isDone = tr.dataset.todoIsDone === "true";
+
+            const data = {
+                id,
+                isDone: !isDone,
+            };
+
+            console.log(data, isDone);
+
+            const response = await fetch("/Home/UpdateToDoItem", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.status == 200) {
+                const responseJson = await response.json();
+                tr.dataset.todoIsDone = responseJson?.isDone;
+  
+                const button = tr.querySelector(`td > button`);
+                button.textContent = responseJson?.isDone ? "✅" : "❌"
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
