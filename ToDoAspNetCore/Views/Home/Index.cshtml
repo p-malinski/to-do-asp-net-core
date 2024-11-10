@@ -7,25 +7,44 @@
     @if (Model.Items.Count == 0)
     {
         <h1 class="display-4">Brak zadań</h1>
-        <p>Aby dodać pierwsze zadanie <a href="/Home/ToDoForm">kliknij tutaj</a>.</p>
+        <p>Aby dodać pierwsze zadanie <a href="/Home/CreateToDoItemForm">kliknij tutaj</a>.</p>
     }
     else
     {
         <h1 class="display-4">Lista zadań</h1>
-        <p>Aby dodać zadanie <a href="/Home/ToDoForm">kliknij tutaj</a>.</p>
+        <p>Aby dodać zadanie <a href="/Home/CreateToDoItemForm">kliknij tutaj</a>.</p>
+    }
 
+    <div class="mb-5 d-flex align-items-center gap-3">
+        <span>Filtruj zadania po konkretnym dniu</span>
+        <form class="d-flex flex-shrink-0 align-items-center gap-3" action="Home" method="get">
+            <input name="dateFilter" class="form-control flex-shrink-0" type="date" value="@ViewBag.DateFilter" />
+            <button class="btn btn-primary flex-shrink-0" onclick="">Zapisz filtr</button>
+        </form>
+    </div>
+
+    @if (Model.Items.Count > 0)
+    {
         <table class="table table-striped">
             <tr>
                 <th>Status</th>
                 <th>Zadanie</th>
                 <th>Data wykonania</th>
+                <th>Akcje</th>
             </tr>
             @foreach (var item in Model.Items)
             {
                 <tr data-todo-item-id="@item.Id" data-todo-is-done=@(item.IsDone ? "true" : "false")>
                     <td><button class="btn btn-light" onclick="updateToDoItem(@item.Id);">@(item.IsDone ? "✅" : "❌")</button></td>
                     <td>@item.Text</td>
-                    <td>@item.DueDate</td>
+                    <td>@item.DueDate.ToString("yyyy-MM-dd")</td>
+                    <td class="d-flex justify-content-center gap-2">
+                        <a class="btn btn-primary" href="/Home/UpdateToDoItemForm/@item.Id" title="Edytuj">✏</a>
+                        <form action="Home/DeleteToDoItem" method="post">
+                            <input type="hidden" name="Id" value="@item.Id" />
+                            <button class="btn btn-danger" onclick="">🗑️</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </table>
@@ -45,7 +64,7 @@
 
             console.log(data, isDone);
 
-            const response = await fetch("/Home/UpdateToDoItem", {
+            const response = await fetch("/Home/UpdateToDoItemJson", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,7 +75,7 @@
             if (response.status == 200) {
                 const responseJson = await response.json();
                 tr.dataset.todoIsDone = responseJson?.isDone;
-  
+
                 const button = tr.querySelector(`td > button`);
                 button.textContent = responseJson?.isDone ? "✅" : "❌"
             }
