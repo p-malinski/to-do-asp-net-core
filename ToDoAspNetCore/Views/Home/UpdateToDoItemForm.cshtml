@@ -22,13 +22,13 @@
         <!-- Text input for task description -->
         <div class="form-group">
             <label asp-for="Text">Opis zadania</label>
-            <input asp-for="Text" class="form-control" type="text" autocomplete="off" />
+            <input asp-for="Text" class="form-control" type="text" autocomplete="off" required />
         </div>
 
         <!-- Date input for DueDate -->
         <div class="form-group">
             <label asp-for="DueDate">Termin</label>
-            <input asp-for="DueDate" class="form-control" type="date" />
+            <input asp-for="DueDate" class="form-control" type="date" required />
         </div>
 
         <!-- Submit button -->
