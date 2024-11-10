@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -19,16 +18,37 @@ namespace ToDoAspNetCore.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(DateOnly? dateFilter)
         {
-            var toDoItems = await _context.ToDoItems.ToListAsync();
+            var toDoItemsQuery = _context.ToDoItems.AsQueryable();
+            ViewBag.DateFilter = dateFilter;
+
+            if (dateFilter.HasValue)
+            {
+                var date = dateFilter.Value;
+                toDoItemsQuery = toDoItemsQuery.Where(i => i.DueDate.Year == date.Year && i.DueDate.Month == date.Month && i.DueDate.Day == date.Day);
+            }
+
+            var toDoItems = await toDoItemsQuery.ToListAsync();
 
             return View(new ToDoPageViewModel { Items = toDoItems.ToViewModelList() });
         }
 
-        public IActionResult ToDoForm()
+        [HttpGet]
+        public IActionResult CreateToDoItemForm()
         {
-            return View();
+            return View(new ToDoItemViewModel { Id = 0, DueDate = DateTime.Now.AddDays(1), IsDone = false, Text = "" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateToDoItemForm(int id)
+        {
+            var dbItem = await _context.ToDoItems.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (dbItem is null)
+                return Redirect("/");
+
+            return View(dbItem.ToViewModel());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -38,18 +58,50 @@ namespace ToDoAspNetCore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToDoItem()
+        public async Task<IActionResult> AddToDoItem([FromForm] UpdateToDoItemModel newToDoItem)
         {
-            return View();
+            if (newToDoItem.Id != 0 || newToDoItem.Text is null || !newToDoItem.IsDone.HasValue || !newToDoItem.DueDate.HasValue)
+                return Redirect("/");
+
+            await _context.ToDoItems.AddAsync(newToDoItem.ToDbModel());
+            await _context.SaveChangesAsync();
+
+            return Redirect("/");
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateToDoItem([FromBody] UpdateToDoItemModel updatedToDoItem)
+        public async Task<IActionResult> UpdateToDoItem([FromForm] UpdateToDoItemModel updatedToDoItem)
+        {
+            var toDoItem = await UpdateTodoItem(updatedToDoItem);
+            return Redirect("/");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateToDoItemJson([FromBody] UpdateToDoItemModel updatedToDoItem)
+        {
+            var toDoItem = await UpdateTodoItem(updatedToDoItem);
+
+            if (toDoItem is null)
+                return NotFound();
+
+            return new OkObjectResult(toDoItem);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteToDoItem([FromForm] int id)
+        {
+            _context.ToDoItems.Remove(_context.ToDoItems.Single(i => i.Id == id));
+            await _context.SaveChangesAsync();
+
+            return Redirect("/");
+        }
+
+        private async Task<ToDoItemModel?> UpdateTodoItem(UpdateToDoItemModel updatedToDoItem)
         {
             var dbItem = await _context.ToDoItems.FirstOrDefaultAsync(x => x.Id == updatedToDoItem.Id);
 
             if (dbItem is null)
-                return NotFound();
+                return null;
 
             if (updatedToDoItem.IsDone.HasValue)
                 dbItem.IsDone = updatedToDoItem.IsDone.Value;
@@ -62,13 +114,7 @@ namespace ToDoAspNetCore.Controllers
 
             await _context.SaveChangesAsync();
 
-            return new OkObjectResult(dbItem);
-        }
-
-        [HttpPost]
-        public IActionResult DeleteToDoItem()
-        {
-            return View();
+            return dbItem;
         }
     }
 }

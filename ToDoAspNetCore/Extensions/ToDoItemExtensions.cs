@@ -19,5 +19,16 @@ namespace ToDoAspNetCore.Extensions
         {
             return orders.Select(order => order.ToViewModel()).ToList();
         }
+
+        public static ToDoItemModel ToDbModel(this UpdateToDoItemModel updateToDoItem)
+        {
+            return new ToDoItemModel
+            {
+                Id = updateToDoItem.Id,
+                Text = updateToDoItem.Text is not null ? updateToDoItem.Text : "",
+                IsDone = updateToDoItem.IsDone.HasValue ? updateToDoItem.IsDone.Value : false,
+                DueDate = updateToDoItem.DueDate.HasValue ? updateToDoItem.DueDate.Value : DateTime.Now,
+            };
+        }
     }
 }

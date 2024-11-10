@@ -1,0 +1,37 @@
+﻿@model ToDoItemViewModel
+@{
+    ViewData["Title"] = "Utwórz nowe zadanie";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Utwórz nowe zadanie</h1>
+    <p>Aby wrócić do listy zadań <a href="/">kliknij tutaj</a>.</p>
+</div>
+
+<form asp-action="AddToDoItem" method="post">
+    <div>
+        <!-- Hidden field for ID -->
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Checkbox for IsDone -->
+        <div class="form-group">
+            <label asp-for="IsDone">Czy ukończone?</label>
+            <input asp-for="IsDone" class="form-check-input" type="checkbox" />
+        </div>
+
+        <!-- Text input for task description -->
+        <div class="form-group">
+            <label asp-for="Text">Opis zadania</label>
+            <input asp-for="Text" class="form-control" type="text" />
+        </div>
+
+        <!-- Date input for DueDate -->
+        <div class="form-group">
+            <label asp-for="DueDate">Termin</label>
+            <input asp-for="DueDate" class="form-control" type="date" />
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </div>
+</form>
