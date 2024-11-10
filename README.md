@@ -1,4 +1,16 @@
 # ToDoAspNetCore - instrukcja użytkowania
+Wykorzystane technologie:
+- ASP.NET Core 8.0
+- Entity Framework Core
+- JavaScript
+- Bootstrap 5
+- SQL Server Express (lokalnie)
+- GitHub
+- GitHub Actions
+- SQL Server Management Studio
+- Azure - hosting aplikacji (App Service, Azure SQL)
+
+# Instrukcja użytkowania
 Po uruchomieniu głównej strony aplikacji pojawia się następujący ekran:
 
 ![image](./docs/images/main_page.png)
@@ -40,3 +52,7 @@ Lista zadań zawiera filtr umożliwiający wyświetlenie zadań z danego dnia. A
 Działanie filtra zostało przedstawione na animacji poniżej:
 
 ![image](./docs/images/date_filter_animation.gif)
+
+# Potencjalne problemy
+- **długi czasładowania aplikacji lub występujący błąd** - ze względu na ograniczenia darmowych zasobów na platformie Azure aplikacja może wyjść ze stanu uśpienia szybciej od bazy danych - należy spróbować odświeżyć stronę po upływie około 30 sekund
+- **brak możliwości korzystania z aplikacji** (nawet po późniejszej próbie odświeżenia strony) - możliwe, że został przekroczony limit darmowych zasobów na platformie Azure - w takim przypadku należy poczekać do następnego dnia, aby aplikacja mogła ponownie działać
