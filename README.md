@@ -1,1 +1,1 @@
-# ToDoAspNetCore
+# ToDoAspNetCore - instrukcja użytkowania
